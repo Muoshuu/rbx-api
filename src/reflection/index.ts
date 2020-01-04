@@ -28,7 +28,7 @@ function getResponse(req: express.Request, res: express.Response, type: string, 
 		if (req.query.defaults !== undefined) {
 			obj = clone(obj); obj.Defaults = (Roblox.Defaults as any)[name];
 		}
-			
+		
 		if (req.query.inherited !== undefined && obj.Superclass) {
 			obj = clone(obj); obj.Members = obj.Members.concat(Roblox.getInheritedMembers(API, obj.Superclass) || []);
 		}
@@ -43,7 +43,29 @@ export async function serveReflection(app: express.Express) {
 	await updateReflection();
 
 	app.get('/dump', (req, res) => {
-		res.json(API);
+		let data = API;
+
+		if (req.query.defaults !== undefined) {
+			data = clone(data);
+
+			for (let rbxClass of data.Classes) {
+				let defaults = (Roblox.Defaults as any)[rbxClass.Name];
+
+				if (defaults.length !== 0) {
+					rbxClass.Defaults = defaults;
+				}
+			}
+		}
+		
+		if (req.query.inherited !== undefined) {
+			data = clone(data);
+			
+			for (let rbxClass of data.Classes) {
+				rbxClass.Members = rbxClass.Members.concat(Roblox.getInheritedMembers(API, rbxClass.Superclass) || []);
+			}
+		}
+
+		res.json(data);
 	}).get('/dump/version', (req, res) => {
 		res.send(API.Version.toString());
 	});
@@ -52,7 +74,29 @@ export async function serveReflection(app: express.Express) {
 		const router = express.Router();
 
 		router.get(`/`, (req, res) => {
-			res.json(API.Classes);
+			let data = API.Classes;
+
+			if (req.query.defaults !== undefined) {
+				data = clone(data);
+
+				for (let rbxClass of data) {
+					let defaults = (Roblox.Defaults as any)[rbxClass.Name];
+					
+					if (defaults.length !== 0) {
+						rbxClass.Defaults = defaults;
+					}
+				}
+			}
+			
+			if (req.query.inherited !== undefined) {
+				data = clone(data);
+
+				for (let rbxClass of data) {
+					rbxClass.Members = rbxClass.Members.concat(Roblox.getInheritedMembers(API, rbxClass.Superclass) || []);
+				}
+			}
+
+			res.json(data);
 		}).get('/:className', (req, res) => {
 			getResponse(req, res, 'Class', req.params.className);
 		}).get(`/:className/members`, (req, res) => {
