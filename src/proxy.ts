@@ -7,7 +7,14 @@ export function serveProxy(app: express.Express): void {
 		let subdomain = (url.match(/https:\/\/(\w+?)\./) || [])[1];
 
 		if (subdomain) {
-			app.use(`/proxy/${subdomain}`, proxy(url));
+			app.use(`/proxy/${subdomain}`, proxy(url, {
+				proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
+					proxyReqOpts.headers = proxyReqOpts.headers || {};
+					proxyReqOpts.headers['X-Forwarded-For'] = srcReq.connection.remoteAddress;
+					
+					return proxyReqOpts;
+				}
+			}));
 		}
 	});
 }
