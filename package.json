@@ -20,6 +20,7 @@
 	"homepage": "https://github.com/Muoshuu/rbx-reflection#readme",
 	"dependencies": {
 		"@types/clone": "^0.1.30",
+		"@types/compression": "^1.0.1",
 		"@types/express": "^4.17.2",
 		"@types/express-http-proxy": "^1.5.12",
 		"@types/node": "^13.1.2",
@@ -27,6 +28,7 @@
 		"@types/request-promise": "^4.1.45",
 		"@types/xml-parser": "^1.2.29",
 		"clone": "^2.1.2",
+		"compression": "^1.7.4",
 		"express": "^4.17.1",
 		"express-http-proxy": "^1.6.0",
 		"request": "^2.88.0",
