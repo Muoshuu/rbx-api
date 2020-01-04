@@ -125,7 +125,11 @@ export async function serveReflection(app: express.Express) {
 	}
 
 	setInterval(() => {
-
+		updateReflection().then(() => {
+			console.log('Reflection updated');
+		}).catch(err => {
+			console.error(err);
+		});
 	}, 60000);
 }
 
