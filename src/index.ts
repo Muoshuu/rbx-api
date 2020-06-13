@@ -1,21 +1,47 @@
 import * as express from 'express';
-import { serveProxy } from './proxy';
-import { serveReflection } from './reflection/.';
-import request = require('request-promise');
+import * as request from 'request-promise';
+import * as compression from 'compression';
+import * as httpProxy from 'express-http-proxy';
 
-const compression = require('compression')();
+import reflection from './reflection';
 
 const app = express(); {
-	app.use(compression);
+    app.use(compression());
+    app.disable('x-powered-by');
+    app.get('/keepAlive', (_, res) => res.end());
 
-	serveProxy(app);
-	serveReflection(app);
+    reflection(app);
+
+    app.use(httpProxy('roblox.com', {
+        proxyReqOptDecorator: (reqOptions, req) => {
+            let subdomain = req.subdomains.reverse().join('.') || 'www';
+
+            switch (subdomain) {
+                case '':
+                    break;
+
+                case 'reflection':
+                    return Promise.reject();
+                
+                default:
+                    reqOptions.hostname = subdomain + '.roblox.com';
+            }
+
+            if (!reqOptions.headers) { reqOptions.headers = {}; }
+
+            reqOptions.headers['X-Forwarded-For'] = req.connection.remoteAddress;
+
+            delete reqOptions.headers['roblox-id'];
+
+            return reqOptions;
+        }
+    }));
 }
 
 if (process.env.PORT) {
-	setInterval(() => {
-		request('https://rbx-api.herokuapp.com/dump/classes/Part/members');
-	}, 600000);
+    setInterval(() => {
+        request('https://rbx-api.xyz/keepAlive');
+    }, 600000);
 }
 
-app.listen(process.env.PORT || 5000);
+app.listen(process.env.PORT || 80);
