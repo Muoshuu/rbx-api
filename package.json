@@ -24,13 +24,13 @@
 		"express-subdomain": "^1.0.5",
 		"request": "^2.88.2",
 		"request-promise": "^4.2.5",
-		"xml-parser": "^1.2.1"
-	},
-	"devDependencies": {
+		"xml-parser": "^1.2.1",
 		"@types/compression": "^1.7.0",
 		"@types/express": "^4.17.6",
 		"@types/request-promise": "^4.1.46",
 		"concurrently": "^5.2.0",
 		"typescript": "^3.9.5"
+	},
+	"devDependencies": {
 	}
 }
