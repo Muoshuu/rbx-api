@@ -16,21 +16,21 @@
 	},
 	"homepage": "https://github.com/Muoshuu/rbx-api#readme",
 	"dependencies": {
+		"@types/compression": "^1.7.0",
+		"@types/express": "^4.17.6",
 		"@types/express-http-proxy": "^1.6.1",
+		"@types/request-promise": "^4.1.46",
 		"@types/xml-parser": "^1.2.29",
 		"compression": "^1.7.4",
+		"concurrently": "^5.2.0",
 		"express": "^4.17.1",
 		"express-http-proxy": "^1.6.0",
 		"express-subdomain": "^1.0.5",
+		"jimp": "^0.13.0",
 		"request": "^2.88.2",
 		"request-promise": "^4.2.5",
-		"xml-parser": "^1.2.1",
-		"@types/compression": "^1.7.0",
-		"@types/express": "^4.17.6",
-		"@types/request-promise": "^4.1.46",
-		"concurrently": "^5.2.0",
-		"typescript": "^3.9.5"
+		"typescript": "^3.9.5",
+		"xml-parser": "^1.2.1"
 	},
-	"devDependencies": {
-	}
+	"devDependencies": {}
 }
