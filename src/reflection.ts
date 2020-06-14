@@ -86,7 +86,21 @@ export default async function(app: express.Express) {
     Icons: {
         router.get('/icons', (req, res) => send(req, res, 'Icons'))
           .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
-          .get('/icons/:iconIndex', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', req.params.iconIndex + '.png'))));
+          .get('/icons/:iconParam', (req, res) => {
+            res.contentType('image/png');
+
+            if (Number(req.params.iconParam)) {
+                res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', req.params.iconParam + '.png')));
+            } else {
+                let obj = roblox.getClass(API, req.params.iconParam);
+
+                if (obj) {
+                    res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', obj.ImageIndex + '.png')));
+                } else {
+                    res.status(404).send({ message: 'Not Found' });
+                }
+            }
+          });
     }
 
     app.use(subdomain('reflection', router));
