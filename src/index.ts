@@ -13,6 +13,7 @@ const app = express(); {
     reflection(app);
 
     app.use(httpProxy('roblox.com', {
+        https: true,
         proxyReqOptDecorator: (reqOptions, req) => {
             let subdomain = req.subdomains.reverse().join('.') || 'www';
 
