@@ -14,6 +14,15 @@ function send(req: express.Request, res: express.Response, type: string): void {
     let obj: any;
     
     switch (type) {
+        case 'Icons':
+            obj = {};
+
+            for (let cls of API.Classes) {
+                obj[cls.Name] = cls.ImageIndex;
+            }
+
+            break;
+
         case 'Inherited':
             obj = roblox.getClass(API, req.params.className);
 
@@ -74,6 +83,12 @@ export default async function(app: express.Express) {
           .get('/enums/:enumName/items/:enumItemIdentifier', (req, res) => send(req, res, 'EnumItem'));
     }
 
+    Icons: {
+        router.get('/icons', (req, res) => send(req, res, 'Icons'))
+          .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
+          .get('/icons/:iconIndex', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', req.params.iconIndex + '.png'))));
+    }
+
     app.use(subdomain('reflection', router));
 }
 
@@ -121,12 +136,32 @@ function insertMeta(xml: string) {
     }
 }
 
+import generateIcons from './generate-icons';
+const RESOURCE_DIR = path.join(__dirname, '..', 'tmp');
+
+if (!fs.existsSync(RESOURCE_DIR)) {
+    fs.mkdirSync(RESOURCE_DIR);
+}
+
 function update(): Promise<void> {
     return new Promise((resolve, reject) => {
         Promise.all([
             request('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json'),
             request('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml'),
-            request('https://raw.githubusercontent.com/Muoshuu/static/master/rbx/api/default_properties.json')
+            request('https://raw.githubusercontent.com/Muoshuu/static/master/rbx/api/default_properties.json'),
+
+            generateIcons(path.join(__dirname, '..', 'tmp'))
+
         ]).then(res => { API = JSON.parse(res[0]); insertMeta(res[1]); defaults = JSON.parse(res[2]); resolve(); }).catch(reject);
     });
 }
+
+setInterval(() => {
+    update().then(() => {
+        console.log('Reflection updated');
+    }).catch(err => {
+        console.error(err);
+
+        setTimeout(update, 30000); // 30s later
+    });
+}, 3600000); // Every hour
