@@ -4,25 +4,18 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as parse from 'xml-parser';
 import * as roblox from './roblox';
+import * as clone from 'clone';
 
 const subdomain = require('express-subdomain');
 
 let API: roblox.APIDump;
 let defaults: roblox.APIDump;
+let iconIndex: { [className: string]: number } = {};
 
 function send(req: express.Request, res: express.Response, type: string): void {
     let obj: any;
     
     switch (type) {
-        case 'Icons':
-            obj = {};
-
-            for (let cls of API.Classes) {
-                obj[cls.Name] = cls.ImageIndex;
-            }
-
-            break;
-
         case 'Inherited':
             obj = roblox.getClass(API, req.params.className);
 
@@ -84,7 +77,7 @@ export default async function(app: express.Express) {
     }
 
     Icons: {
-        router.get('/icons', (req, res) => send(req, res, 'Icons'))
+        router.get('/icons', (req, res) => res.send(iconIndex))
           .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
           .get('/icons/:iconParam', (req, res) => {
             res.contentType('image/png');
@@ -102,6 +95,10 @@ export default async function(app: express.Express) {
             }
           });
     }
+
+    router.get('/all', (req, res) => {
+        res.send({ api: API, defaults: defaults, iconIndex: iconIndex });
+    });
 
     app.use(subdomain('reflection', router));
 }
@@ -166,7 +163,16 @@ function update(): Promise<void> {
 
             generateIcons(path.join(__dirname, '..', 'tmp'))
 
-        ]).then(res => { API = JSON.parse(res[0]); insertMeta(res[1]); defaults = JSON.parse(res[2]); resolve(); }).catch(reject);
+        ]).then(res => {
+            API = JSON.parse(res[0]); insertMeta(res[1]);
+            defaults = JSON.parse(res[2]);
+
+            for (let cls of API.Classes) {
+                iconIndex[cls.Name] = cls.ImageIndex;
+            }
+            
+            resolve();
+        }).catch(reject);
     });
 }
 
