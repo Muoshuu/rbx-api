@@ -55,6 +55,8 @@ function send(req: express.Request, res: express.Response, type: string): void {
 export default async function(app: express.Express) {
     await update();
 
+    const mainRouter = express.Router();
+
     const v1 = express.Router(); {
         v1.get('/', (req, res) => res.send(API))
         .get('/version', (req, res) => res.send(API.Version.toString()));
@@ -76,7 +78,7 @@ export default async function(app: express.Express) {
         }
 
         Icons: {
-            v1.get('/icons', (req, res) => res.send(iconIndex))
+            mainRouter.get('/icons', (req, res) => res.send(iconIndex))
             .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
             .get('/icons/:iconParam', (req, res) => {
                 res.contentType('image/png');
@@ -99,9 +101,8 @@ export default async function(app: express.Express) {
             res.send({ api: API, defaults: defaults, iconIndex: iconIndex });
         });
     }
-
-    const mainRouter = express.Router();
-        mainRouter.use('/v1', v1);
+    
+    mainRouter.use('/v1', v1);
 
     app.use(subdomain('reflection', mainRouter));
 }
