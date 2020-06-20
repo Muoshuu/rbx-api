@@ -55,52 +55,55 @@ function send(req: express.Request, res: express.Response, type: string): void {
 export default async function(app: express.Express) {
     await update();
 
-    const router = express.Router();
-    
-    router.get('/', (req, res) => res.send(API))
-      .get('/version', (req, res) => res.send(API.Version.toString()));
+    const v1 = express.Router(); {
+        v1.get('/', (req, res) => res.send(API))
+        .get('/version', (req, res) => res.send(API.Version.toString()));
 
-    Classes: {
-        router.get('/classes', (req, res) => res.send(API.Classes))
-          .get('/classes/:className', (req, res) => send(req, res, 'Class'))
-          .get('/classes/:className/members', (req, res) => send(req, res, 'Members'))
-          .get('/classes/:className/members/inherited', (req, res) => send(req, res, 'Inherited'))
-          .get('/classes/:className/members/defaults', (req, res) => send(req, res, 'Defaults'))
-          .get('/classes/:className/members/:memberName', (req, res) => send(req, res, 'Member'));
-    }
+        Classes: {
+            v1.get('/classes', (req, res) => res.send(API.Classes))
+            .get('/classes/:className', (req, res) => send(req, res, 'Class'))
+            .get('/classes/:className/members', (req, res) => send(req, res, 'Members'))
+            .get('/classes/:className/members/inherited', (req, res) => send(req, res, 'Inherited'))
+            .get('/classes/:className/members/defaults', (req, res) => send(req, res, 'Defaults'))
+            .get('/classes/:className/members/:memberName', (req, res) => send(req, res, 'Member'));
+        }
 
-    Enums: {
-        router.get('/enums', (req, res) => res.send(API.Enums))
-          .get('/enums/:enumName', (req, res) => send(req, res, 'Enum'))
-          .get('/enums/:enumName/items', (req, res) => send(req, res, 'Items'))
-          .get('/enums/:enumName/items/:enumItemIdentifier', (req, res) => send(req, res, 'EnumItem'));
-    }
+        Enums: {
+            v1.get('/enums', (req, res) => res.send(API.Enums))
+            .get('/enums/:enumName', (req, res) => send(req, res, 'Enum'))
+            .get('/enums/:enumName/items', (req, res) => send(req, res, 'Items'))
+            .get('/enums/:enumName/items/:enumItemIdentifier', (req, res) => send(req, res, 'EnumItem'));
+        }
 
-    Icons: {
-        router.get('/icons', (req, res) => res.send(iconIndex))
-          .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
-          .get('/icons/:iconParam', (req, res) => {
-            res.contentType('image/png');
+        Icons: {
+            v1.get('/icons', (req, res) => res.send(iconIndex))
+            .get('/icons/latest', (req, res) => res.contentType('image/png').send(fs.readFileSync(path.join(RESOURCE_DIR, 'classImages.png'))))
+            .get('/icons/:iconParam', (req, res) => {
+                res.contentType('image/png');
 
-            if (Number(req.params.iconParam)) {
-                res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', req.params.iconParam + '.png')));
-            } else {
-                let obj = roblox.getClass(API, req.params.iconParam);
-
-                if (obj) {
-                    res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', obj.ImageIndex + '.png')));
+                if (Number(req.params.iconParam)) {
+                    res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', req.params.iconParam + '.png')));
                 } else {
-                    res.status(404).send({ message: 'Not Found' });
+                    let obj = roblox.getClass(API, req.params.iconParam);
+
+                    if (obj) {
+                        res.send(fs.readFileSync(path.join(RESOURCE_DIR, 'classes', obj.ImageIndex + '.png')));
+                    } else {
+                        res.status(404).send({ message: 'Not Found' });
+                    }
                 }
-            }
-          });
+            });
+        }
+
+        v1.get('/all', (req, res) => {
+            res.send({ api: API, defaults: defaults, iconIndex: iconIndex });
+        });
     }
 
-    router.get('/all', (req, res) => {
-        res.send({ api: API, defaults: defaults, iconIndex: iconIndex });
-    });
+    const mainRouter = express.Router();
+        mainRouter.use('/v1', v1);
 
-    app.use(subdomain('reflection', router));
+    app.use(subdomain('reflection', mainRouter));
 }
 
 function insertMeta(xml: string) {
