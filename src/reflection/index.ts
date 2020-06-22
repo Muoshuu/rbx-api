@@ -9,8 +9,11 @@ declare global {
     type Route = { base: string, router: express.Router, state?: State };
 }
 
-const getJSON = bent('json');
-const getText = bent('string');
+const _getJSON = bent('json');
+const _getText = bent('string');
+
+function getJSON(url: string) { console.log(url); return _getJSON(url); }
+function getText(url: string) { console.log(url); return _getText(url); }
 
 import route_v1 from './routes/v1';
 import route_v2 from './routes/v2';
