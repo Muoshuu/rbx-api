@@ -12,14 +12,13 @@ const app = express(); {
 
     reflection.serve().then(router => {
         app.use(subdomain('reflection', router));
+        app.use(subdomain('reflection.staging', router));
 
         app.use(proxy('roblox.com', {
             https: true,
     
             proxyReqOptDecorator: (reqOptions, req) => {
                 let subdomains = req.subdomains;
-
-                console.log('request to ', req.host + req.path);
     
                 if (subdomains[0] === 'staging') {
                     subdomains = subdomains.splice(1, 1);
