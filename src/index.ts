@@ -12,40 +12,40 @@ const app = express(); {
 
     reflection.serve().then(router => {
         app.use(subdomain('reflection', router));
+        
+        app.use(proxy('roblox.com', {
+            https: true,
+    
+            proxyReqOptDecorator: (reqOptions, req) => {
+                let subdomains = req.subdomains;
+    
+                if (subdomains[0] === 'staging') {
+                    subdomains = subdomains.splice(1, 1);
+                }
+    
+                let subdomain = subdomains.reverse().join('.') || 'www';
+    
+                switch (subdomain) {
+                    case '':
+                        break;
+    
+                    case 'reflection':
+                        return Promise.reject();
+                    
+                    default:
+                        reqOptions.hostname = subdomain + '.roblox.com';
+                }
+    
+                if (!reqOptions.headers) { reqOptions.headers = {}; }
+    
+                reqOptions.headers['X-Forwarded-For'] = req.connection.remoteAddress;
+    
+                delete reqOptions.headers['roblox-id'];
+    
+                return reqOptions;
+            }
+        }));
     });
-
-    app.use(proxy('roblox.com', {
-        https: true,
-
-        proxyReqOptDecorator: (reqOptions, req) => {
-            let subdomains = req.subdomains;
-
-            if (subdomains[0] === 'staging') {
-                subdomains = subdomains.splice(1, 1);
-            }
-
-            let subdomain = subdomains.reverse().join('.') || 'www';
-
-            switch (subdomain) {
-                case '':
-                    break;
-
-                case 'reflection':
-                    return Promise.reject();
-                
-                default:
-                    reqOptions.hostname = subdomain + '.roblox.com';
-            }
-
-            if (!reqOptions.headers) { reqOptions.headers = {}; }
-
-            reqOptions.headers['X-Forwarded-For'] = req.connection.remoteAddress;
-
-            delete reqOptions.headers['roblox-id'];
-
-            return reqOptions;
-        }
-    }));
 }
 
 /*if (process.env.PORT) {
