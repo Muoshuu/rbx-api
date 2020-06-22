@@ -9,8 +9,8 @@ declare global {
     type Route = { base: string, router: express.Router, state?: State };
 }
 
-const _getJSON = bent('json');
-const _getText = bent('string');
+const _getJSON = bent('json', { statusCodes: [200, 404] });
+const _getText = bent('string', { statusCodes: [200, 404] });
 
 function getJSON(url: string) { console.log(url); return _getJSON(url); }
 function getText(url: string) { console.log(url); return _getText(url); }
