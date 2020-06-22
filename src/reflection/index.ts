@@ -9,11 +9,8 @@ declare global {
     type Route = { base: string, router: express.Router, state?: State };
 }
 
-const _getJSON = bent('json', { statusCodes: [200, 404] });
-const _getText = bent('string', { statusCodes: [200, 404] });
-
-function getJSON(url: string) { console.log(url); return _getJSON(url); }
-function getText(url: string) { console.log(url); return _getText(url); }
+const getJSON = bent('json');
+const getText = bent('string');
 
 import route_v1 from './routes/v1';
 import route_v2 from './routes/v2';
@@ -24,12 +21,21 @@ const updateAPI = (state: State) => {
         Promise.all([
             getText('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml'),
             getJSON('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json'),
-            getJSON('https://raw.githubusercontent.com/Muoshuu/static/master/rbx/api/default_properties.json'),
-
-            icons.generate(path.join(__dirname, 'icons'))
+            getJSON('https://raw.githubusercontent.com/Muoshuu/static/master/rbx/api/default_properties.json')
 
         ]).then((data: any) => {
-            state.api = new rbx.API(data[3], data[1], data[2], data[0].toString()); resolve();
+            let classes: rbx.Class[] = data[1].Classes;
+            let iconIndex: icons.ClassIconIndex = {};
+
+            for (let rbxClass of classes) {
+                if (rbxClass.ImageIndex !== undefined) {
+                    iconIndex[rbxClass.Name] = rbxClass.ImageIndex;
+                }
+            }
+            
+            icons.generate(path.join(__dirname, 'icons'), iconIndex).then(iconIndex => {
+                state.api = new rbx.API(data[3], data[1], data[2], data[0].toString()); resolve();
+            });
         }).catch(reject);
     });
 };

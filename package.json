@@ -1,6 +1,6 @@
 {
 	"name": "rbx-api",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "None",
 	"main": "out/index.js",
 	"scripts": {
@@ -29,7 +29,7 @@
 		"express": "^4.17.1",
 		"express-http-proxy": "^1.6.0",
 		"express-subdomain": "^1.0.5",
-		"rbx-icons": "^1.0.5",
+		"rbx-icons": "^1.0.8",
 		"typescript": "^3.9.5",
 		"xml-parser": "^1.2.1"
 	},
