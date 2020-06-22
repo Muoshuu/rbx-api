@@ -30,6 +30,7 @@
 		"express-http-proxy": "^1.6.0",
 		"express-subdomain": "^1.0.5",
 		"rbx-icons": "^1.0.5",
+		"typescript": "^3.9.5",
 		"xml-parser": "^1.2.1"
 	},
 	"devDependencies": {
