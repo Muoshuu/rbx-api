@@ -18,7 +18,15 @@ const app = express(); {
         https: true,
 
         proxyReqOptDecorator: (reqOptions, req) => {
-            let subdomain = req.subdomains.reverse().join('.') || 'www';
+            let subdomains = req.subdomains;
+
+            if (subdomains[0] === 'staging') {
+                subdomains = subdomains.splice(1, 1);
+            }
+
+            let subdomain = subdomains.reverse().join('.') || 'www';
+
+            console.log(subdomain);
 
             switch (subdomain) {
                 case '':
