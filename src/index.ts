@@ -26,8 +26,6 @@ const app = express(); {
 
             let subdomain = subdomains.reverse().join('.') || 'www';
 
-            console.log(subdomain);
-
             switch (subdomain) {
                 case '':
                     break;
