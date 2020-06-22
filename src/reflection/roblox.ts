@@ -29,8 +29,8 @@ export type Class = {
     MemoryCategory: string,
     Superclass: string,
     Members:  Member[],
-    SortOrder: number,
-    ImageIndex: number,
+    SortOrder?: number,
+    ImageIndex?: number,
     Tags?: string[],
     Summary?: string,
     ClassCategory?: string,
@@ -149,10 +149,10 @@ export class API {
             let defaultValues = defaults.Classes[rbxClass.Name]?.DefaultProperties;
             let metadata = this.Metadata.find(metadata => metadata.ClassName === rbxClass.Name);
 
-            rbxClass.SortOrder = metadata?.SortOrder || 0;
-            rbxClass.ImageIndex = metadata?.ImageIndex || 0;
-            rbxClass.Summary = metadata?.Summary || '';
-            rbxClass.ClassCategory = metadata?.ClassCategory || '';
+            rbxClass.SortOrder = metadata?.SortOrder;
+            rbxClass.ImageIndex = metadata?.ImageIndex;
+            rbxClass.Summary = metadata?.Summary;
+            rbxClass.ClassCategory = metadata?.ClassCategory;
 
             let rbxClassWithDefaults = clone(rbxClass);
             let rbxClassWithInherited = clone(rbxClass);
