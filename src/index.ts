@@ -1,19 +1,22 @@
 import * as express from 'express';
-import * as request from 'request-promise';
 import * as compression from 'compression';
-import * as httpProxy from 'express-http-proxy';
+import * as proxy from 'express-http-proxy';
+import * as reflection from './reflection';
 
-import reflection from './reflection';
+const subdomain = require('express-subdomain');
 
 const app = express(); {
     app.use(compression());
     app.disable('x-powered-by');
     app.get('/keepAlive', (_, res) => res.end());
 
-    reflection(app);
+    reflection.serve().then(router => {
+        app.use(subdomain('reflection', router));
+    });
 
-    app.use(httpProxy('roblox.com', {
+    app.use(proxy('roblox.com', {
         https: true,
+
         proxyReqOptDecorator: (reqOptions, req) => {
             let subdomain = req.subdomains.reverse().join('.') || 'www';
 
@@ -39,10 +42,10 @@ const app = express(); {
     }));
 }
 
-if (process.env.PORT) {
+/*if (process.env.PORT) {
     setInterval(() => {
         request('https://rbx-api.xyz/keepAlive');
     }, 600000);
-}
+}*/
 
 app.listen(process.env.PORT || 80);

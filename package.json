@@ -1,7 +1,7 @@
 {
 	"name": "rbx-api",
-	"version": "1.0.0",
-	"description": "",
+	"version": "1.1.0",
+	"description": "None",
 	"main": "out/index.js",
 	"scripts": {
 		"build": "tsc -p ./",
@@ -9,30 +9,30 @@
 		"watch": "concurrently \"tsc --watch -p ./\" \"nodemon -e js out\""
 	},
 	"author": "Muoshuu <admin@muoshuu.me>",
-	"license": "ISC",
+	"license": "UNLICENSED",
+	"private": true,
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Muoshuu/rbx-api.git"
 	},
 	"homepage": "https://github.com/Muoshuu/rbx-api#readme",
 	"dependencies": {
+		"@types/bent": "^7.0.2",
 		"@types/clone": "^0.1.30",
 		"@types/compression": "^1.7.0",
 		"@types/express": "^4.17.6",
 		"@types/express-http-proxy": "^1.6.1",
-		"@types/request-promise": "^4.1.46",
 		"@types/xml-parser": "^1.2.29",
+		"bent": "^7.3.6",
 		"clone": "^2.1.2",
 		"compression": "^1.7.4",
-		"concurrently": "^5.2.0",
 		"express": "^4.17.1",
 		"express-http-proxy": "^1.6.0",
 		"express-subdomain": "^1.0.5",
-		"jimp": "^0.13.0",
-		"request": "^2.88.2",
-		"request-promise": "^4.2.5",
-		"typescript": "^3.9.5",
+		"rbx-icons": "^1.0.5",
 		"xml-parser": "^1.2.1"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"concurrently": "^5.2.0"
+	}
 }
