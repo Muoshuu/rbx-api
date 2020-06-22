@@ -3,56 +3,57 @@ import * as compression from 'compression';
 import * as proxy from 'express-http-proxy';
 import * as reflection from './reflection';
 
-const subdomain = require('express-subdomain');
+import bent = require('bent');
+
+const subdomain: (subdomainName: string, handler: express.RequestHandler) => express.RequestHandler = require('express-subdomain');
 
 const app = express(); {
     app.use(compression());
     app.disable('x-powered-by');
-    app.get('/keepAlive', (_, res) => res.end());
+    app.get('/keepAlive', (_, res) => res.status(204).end());
 
-    reflection.serve().then(router => {
-        app.use(subdomain('reflection', router));
-        app.use(subdomain('reflection.staging', router));
-
-        app.use(proxy('roblox.com', {
-            https: true,
-    
-            proxyReqOptDecorator: (reqOptions, req) => {
-                let subdomains = req.subdomains;
-    
-                if (subdomains[0] === 'staging') {
-                    subdomains = subdomains.splice(1, 1);
-                }
-    
-                let subdomain = subdomains.reverse().join('.') || 'www';
-    
-                switch (subdomain) {
-                    case '':
-                        break;
-    
-                    case 'reflection':
-                        return Promise.reject();
-                    
-                    default:
-                        reqOptions.hostname = subdomain + '.roblox.com';
-                }
-    
-                if (!reqOptions.headers) { reqOptions.headers = {}; }
-    
-                reqOptions.headers['X-Forwarded-For'] = req.connection.remoteAddress;
-    
-                delete reqOptions.headers['roblox-id'];
-    
-                return reqOptions;
+    reflection.serve().then(reflectionRouter => {
+        const proxyReqOptDecorator = (reqOptions: any, req: any) => {
+            if (req.params.subdomain === 'reflection' || req.params.subdomain === 'favicon') {
+                return Promise.reject('');
             }
-        }));
+
+            let subdomain = req.subdomains[0] || 'www';
+            
+            if (subdomain === 'staging' && req.params.subdomain) {
+                subdomain = req.params.subdomain;
+            }
+
+            switch (subdomain) {
+                case '': break;
+                case 'reflection': return Promise.reject();
+                default: reqOptions.hostname = subdomain + '.roblox.com';
+            }
+
+            reqOptions.headers = reqOptions.headers || {};
+            reqOptions.headers['X-Forwarded-For'] = req.connection.remoteAddress;
+
+            delete reqOptions.headers['roblox-id'];
+
+            return reqOptions;
+        };
+
+        const proxyErrorHandler = (err: any, res: express.Response) => {
+            if (err.code === 'ENOTFOUND') {
+                res.status(404).json({ code: 404, message: 'Not Found' });
+            }
+        };
+
+        app.use(subdomain('reflection', reflectionRouter));
+        app.use('/:subdomain', proxy('roblox.com', { https: true, proxyReqOptDecorator, proxyErrorHandler }));
+        app.use('/reflection', subdomain('staging', reflectionRouter));
     });
 }
 
-/*if (process.env.PORT) {
+if (process.env.PORT) {
     setInterval(() => {
-        request('https://rbx-api.xyz/keepAlive');
+        bent('https://rbx-api.xyz/keepAlive');
     }, 600000);
-}*/
+}
 
 app.listen(process.env.PORT || 80);
