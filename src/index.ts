@@ -14,7 +14,7 @@ const app = express(); {
 
     reflection.serve().then(reflectionRouter => {
         const proxyReqOptDecorator = (reqOptions: any, req: any) => {
-            if (req.params.subdomain === 'reflection' || req.params.subdomain === 'favicon') {
+            if (req.params.subdomain === 'reflection') {
                 return Promise.reject('');
             }
 
