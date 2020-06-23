@@ -33,7 +33,7 @@ const updateAPI = (state: State) => {
                 }
             }
             
-            icons.generate(path.join(__dirname, 'icons'), state.api?.IconIndex).then(iconPathIndex => {
+            icons.generate(path.join(__dirname, 'icons'), iconIndex).then(iconPathIndex => {
                 state.api = new rbx.API(iconPathIndex, data[1], data[2], data[0].toString()); resolve();
             });
         }).catch(reject);
