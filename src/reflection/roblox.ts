@@ -80,7 +80,7 @@ type ClassIconIndex = {
     [className: string]: number
 };
 
-function parse(xml: string) {
+export function parseXML(xml: string) {
     const data: ClassMetadata[] = [];
     const object = xmlParser(xml);
 
@@ -136,7 +136,7 @@ export class API {
     ) {
         this.Enums = api.Enums;
         this.Classes = api.Classes;
-        this.Metadata = parse(metadataXML);
+        this.Metadata = parseXML(metadataXML);
 
         this.IconIndex = {};
 
@@ -259,7 +259,7 @@ export class API {
         return this.AllData;
     }
 
-    getClasses(options?: APIRequestOptions): Class[] | undefined {
+    getClasses(options?: APIRequestOptions): Class[] {
         return this._getClasses(options);
     }
 

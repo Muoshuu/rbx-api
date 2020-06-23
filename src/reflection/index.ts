@@ -24,17 +24,17 @@ const updateAPI = (state: State) => {
             getJSON('https://raw.githubusercontent.com/Muoshuu/static/master/rbx/api/default_properties.json')
 
         ]).then((data: any) => {
-            let classes: rbx.Class[] = data[1].Classes;
             let iconIndex: icons.ClassIconIndex = {};
+            let metadata = rbx.parseXML(data[0]);
 
-            for (let rbxClass of classes) {
-                if (rbxClass.ImageIndex !== undefined) {
-                    iconIndex[rbxClass.Name] = rbxClass.ImageIndex;
+            for (let classMeta of metadata) {
+                if (classMeta.ImageIndex) {
+                    iconIndex[classMeta.ClassName] = classMeta.ImageIndex;
                 }
             }
             
-            icons.generate(path.join(__dirname, 'icons'), iconIndex).then(iconIndex => {
-                state.api = new rbx.API(data[3], data[1], data[2], data[0].toString()); resolve();
+            icons.generate(path.join(__dirname, 'icons'), state.api?.IconIndex).then(iconPathIndex => {
+                state.api = new rbx.API(iconPathIndex, data[1], data[2], data[0].toString()); resolve();
             });
         }).catch(reject);
     });
